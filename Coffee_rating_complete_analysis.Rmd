@@ -1,0 +1,235 @@
+---
+title: "Project 1"
+description: |
+  Coffee Review Visualizations
+date: May 13, 2021
+author:
+- first_name: "AASHUTOSH"
+  last_name: "SEHGAL (0780170)"
+- first_name: "IMAN"
+  last_name: "FATIMA (0784241)"
+- first_name: "JASMINE (0775648)"
+- first_name: "RUBALDEEP"
+  last_name: "KAUR (0775850)"
+- first_name: "UMAIR"
+  last_name: "NABEEL (0780185)"
+
+output: distill::distill_article
+
+---
+**Group Number: 25**
+
+**This project completely represents our work, any help or guidance taken is mentioned, and we have strictly adhered to St. Clair** **College's Academic Integrity policy.**
+
+**R & RStudio Version:** 
+
+- 4.0.5 (2021-03-31)
+- 1.4.1106
+
+**Packages and their versions:**
+
+- Tidyverse (1.3.1)
+- Ggplot2 (3.3.3)
+- Gganimate (1.0.7)
+- Gifski (1.4.3.1)
+
+**Documentation to data set: **
+
+1. Attribution of owner/creator of data
+
+- The title Coffee Ratings comes from Coffee Quality Database by the data scientist James Le Doux. This data is copyright and this is provided for information, research and educational purposes only. This data can be used to modify, merge, publish and distribute. This data is not be distributed for other purpose without the permission of the licensed owner.
+
+- https://github.com/jldbc/coffee-quality-database/blob/master/LICENSE
+
+2. Links to data
+
+- https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-07-07/readme.md
+- https://database.coffeeinstitute.org/
+- https://github.com/jldbc/coffee-quality-database
+
+3. Summary Information about the data 
+
+Coffee ratings the data published by the data scientist James Le Doux. It was collected from the Coffee Quality Institute in January 2018. From the data we can understand following information:
+
+- This data is about the two famous varieties of coffee beans i.e. Arabica and Robusta beans. 
+- The data set contains 1339 rows and 43 columns.
+- Among these 43 columns 24 of them consist of character and 19 of them are numeric. 
+- The both flavors are rated by different countries on the basis of aroma, flavors, sweetness, moisture, color, aftertaste, body and balance.
+- The columns 1-15 depicts the details about coffee beans and information related to them.
+- The columns 16-20 gives the information about the harvesting and processing methods.
+- The columns 21-31 contains the quality measurements. 
+- The columns 32-40 gives information about the coffee certification.
+- Columns at the end depict altitude data from the farm.
+
+**Documentation of any changes made to the original data set**
+```{r message=FALSE, echo=FALSE}
+
+library(tidyverse)
+library(gganimate)
+library(gifski)
+
+coffee_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+
+owner_factor <- as.factor(coffee_ratings$owner)
+owner_dataframe = (as.data.frame(table(owner_factor)))
+top_owners <- tail(owner_dataframe[order(owner_dataframe$Freq),],n=10)
+
+country_table<-coffee_ratings %>% count(country_of_origin = factor(country_of_origin))
+country_table<-na.omit(country_table)
+country_table<-country_table[order(country_table$n),]
+
+coffee_ratings$'year' <-  (as.factor(str_sub(trimws(coffee_ratings$grading_date,"r"), -4,-1)))
+
+cofdat <- coffee_ratings %>%
+  filter(total_cup_points>0) %>% 
+  select(c("aroma","aftertaste","acidity","body","balance","uniformity","clean_cup","sweetness"))
+cofdat <- na.omit(cofdat)
+cof_long <- cofdat %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "Var", 
+               values_to = "value")
+```
+
+The following changes have been made to the original data:
+
+- The column containing owners name is converted to Factor data type and from it top 10 most frequent names have been extracted.
+- The different country from where coffee is originated is converted to factor and NA values are removed and reordered in descending order.
+- A new column year has been added which contains values from grading _year column and filter values into "YYYY" format. 
+- We filtered out values of 8 grading variables into a different variable with NA's removed and pivots the data.
+
+**1) Displaying the distribution of a single continuous variable**
+```{r message=FALSE,warning=FALSE,code_folding=TRUE}
+ggplot(data = coffee_ratings, 
+       aes(flavor,fill = cut(flavor, 70)))+
+  geom_histogram(bins = 70,show.legend = FALSE,
+                 binwidth=0.1)+xlim(6, 9)+
+  labs(x = "Flavor", y = "Count",title = "Flavour distribution",caption = "Source: github/tidytuesday")
+```
+
+> Most rated flavors are between 7 and 8.
+
+**2) Displaying the distribution of a single continuous variable**
+```{r warning=FALSE,code_folding=TRUE}
+ggplot(data = coffee_ratings,aes(aroma))+
+  geom_density(color="darkblue", fill="lightblue")+ xlim(5, 9)+
+  labs(x = "Cupper Points", y = "Density",title = "Cupper Points Density",caption = "Source: github/tidytuesday")
+```
+
+> Overall Cupper Points are distributed with mean values around 7.5 and approximate range of 6.5-8.5.
+
+**3) Displaying information about a single categorical variable**
+```{r,code_folding=TRUE}
+ggplot(data = top_owners,aes(y =owner_factor,x=Freq,fill = Freq))+
+  geom_col()+
+   geom_text(aes(label = Freq),size = 2.5,color = "white",hjust = 1.3)+
+  scale_fill_gradient(low="darkkhaki", high="darkgreen")+
+  labs(x ="Frequency" , y = "Owner",title = "Top 10 Owners",caption = "Source: github/tidytuesday")
+```
+
+> Among the top 10 owners based on the frequency of their occurrence in data Juan Luis Alvarado Romero has the maximum occurrence of more than twice than that of others.
+Moreover, Racafe & cia s.c.a is on second number and closly followed by Exportadora de cafe condor s.a, Kona pacific farmers cooperative.
+
+**4) Displaying information about a single categorical variable**
+```{r message=FALSE,code_folding=TRUE}
+ggplot(data = country_table,mapping = aes(x=reorder(country_of_origin,-n),y=n))+
+  theme_bw()+
+  geom_bar(stat="identity",fill="#0B84A5")+
+  geom_text(aes(label=n),color="black",size=2.4,nudge_y = 7)+
+  coord_flip() +
+  labs(x = "Frequency", y = "Countries",title = "Frequency of Countries where coffee is grown",caption = "Source: github/tidytuesday")
+```
+
+>  From the  top 10 coffee producing countries Mexico, Colombia, Guatemala, Brazil are the leaders and account for maximum production.
+Apart from this many countries like Zambia, Rwanda, Mauritius, Papua New Guinea and Japan contribute least to the production.
+
+**5) Displaying information about both a continuous variable and a categorical variable**
+```{r warning=FALSE,code_folding=TRUE}
+ggplot(coffee_ratings,aes(total_cup_points,species,color= species))+
+  geom_boxplot( size=1.3,
+                outlier.shape = 1,
+                outlier.color = "black",
+                outlier.size  = 3)+
+  geom_jitter(alpha = 0.15, 
+              width=.1)+theme_minimal()+
+  scale_x_continuous(breaks = seq(70, 90, 5),limits=c(70, 90))+
+  stat_boxplot(geom ='errorbar')+
+  labs(x = "Total Cup Points", y = "Species",title = "Ratings for Species (Arabica & Robusta)",caption = "Source: github/tidytuesday")
+```
+
+> Arabica beans tend to give higher scores than Robusta beans.
+
+**6) Display information that shows a relationship between two variables**
+```{r warning=FALSE,code_folding=TRUE}
+ggplot(coffee_ratings, aes(x=year)) + 
+  geom_line(aes(y=category_two_defects, col="category_two_defects"),size = 2) + 
+  geom_line(aes(y=category_one_defects, col="category_one_defects"),size = 2) + 
+  labs(title="Category Defects", 
+       caption="Source: github/tidytuesday", 
+       y="Category Defects",
+       x="Year")
+```
+
+> Category 1 defect appears more as compared to category 2 in 2011, 2012, 2014 & 2016 whereas the trend is reverse for rest of the given years.
+
+**7) Display information that shows a relationship between two variables**
+```{r,code_folding=TRUE}
+ggplot(coffee_ratings,aes(x=year,y=number_of_bags))+
+  stat_summary(fun = sum, na.rm = TRUE,geom='line',aes(group=color,color=color),size = 1.3) + 
+  labs(x = "Year", y = "Number of Bags Tested Per Year",title = "Number of Bags Tested of different Bean Color over Year",caption = "Source: github/tidytuesday")
+```
+
+> From the plot , we can infer that the maximum number of bags tested over the period were of Green Colored beans and least for beans with no color.
+
+**8) Use faceting and display information about 4 variables**
+```{r message=FALSE,code_folding=TRUE}
+ggplot(data = coffee_ratings,mapping=aes(aroma,total_cup_points))+
+  geom_point(color="darkblue", fill="lightblue") +
+  facet_grid(species~processing_method, labeller = label_wrap_gen(width = 2, multi_line = TRUE)) +
+  labs(x = "Aroma", y = "Density",title = "Aroma Density for both species by different processing menthods",caption = "Source: github/tidytuesday")+xlim(6.5, 8.2)
+```
+
+> From the plot, we can derive that beans processed by Natural/Dry and Washed/Wet method with Aroma grading of 6.5 and above have better cup points. 
+
+**9) This plot must use ggplot2 but additional packages may be used like Interactive plots (ggplotly); different data sets in same plot;** **subplots; animation (gganimate); etc.**
+```{r warning=FALSE,code_folding=TRUE,layout="l-page",fig.width=6, fig.height=8}
+goo <- ggplot(cof_long) +
+  geom_histogram(aes(value), bins = 60,color="blue",fill="grey")+
+  facet_wrap(~Var, scales = "free_y",nrow = 4)+
+  transition_states(value, transition_length = 2,
+    state_length = 1) +
+  shadow_mark() +
+  enter_grow() +
+  enter_fade() +
+    exit_shrink() +
+  labs(x = "Value", y = "Count",title = "Various Quality Scores")
+
+animate(goo,renderer = sprite_renderer())
+
+```
+
+
+
+**References to any external sources used and how they were used (note any books, blogs, websites, etc that you referred to in completing** **this project)**
+
+- https://rpubs.com/GarethChad/coffee_EDA
+- https://r4ds.had.co.nz/
+- https://tidyr.tidyverse.org/
+- http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#top
+- https://ggplot2.tidyverse.org/
+- https://gganimate.com/articles/gganimate.html
+
+**■ In what ways do you think data visualization is important to understanding a data set?**
+
+In this fast growing digital world, we have access to large data sets that have billions of rows and millions of columns merely looking at that data would not give us any meaningful insight, so to make that data understandable we use data visualizations like scatter plot, bar chart, histogram and line chart to understand what the data is trying to tell us. These visualizations are a medium to convey the message from those billions and millions of rows and columns. It gives us an overview of what information can we extract from these variables.
+
+**■ In what ways do you think data visualization is important to communicating important aspects of a data set?**
+
+A picture is worth thousand of words this quote completely implies the importance of data visualizations. Humans from the very beginning have been keen towards considering visualizations as a medium to understand various complex concepts in a simple manner, same applies to data visualizations when we have huge messy indexed data, we see these graphs and plots as a method of conveying the relevant aspects related to the data such as major trends, impacts of different variables etc.
+
+**■ What role does your integrity as an analyst play when creating a data visualization for communicating results to others?**
+
+With all the easy and automated tools available in market that can help anyone to make plots and graphs, but the analysts plays the major role and act as bridge between those highly advance tools and final visualizations, the selection of appropriate variables to plot on the axes and what aesthetics to choose so that it's most easy and convenient to understand the plot. 
+
+**■ How many variables do you think you can successfully represent in a visualization? What happens when you exceed this number?**
+
+After creation of this project, the conclusion that I've reached is that a visualizations can be considered successful with 3-4 variables being used to plot it. However, if we try to exceed this multivariate limit could lead to go beyond the capabilities of humans to percept the visualization, and also to connect meaning to shapes, colors, sizes, positions, trends, clusters, outliers — deteriorates as more and more variables are represented.

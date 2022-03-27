@@ -1,0 +1,44 @@
+Variable,Class,Description,Type of value,Number of unique value
+total_cup_points,double,Total rating/points (0 - 100 scale),Continous,180
+species,character,Species of coffee bean (arabica or robusta),Categoricial,2
+owner,character,Owner of the farm,Categoricial,316
+country_of_origin,character,Where the bean came from,Categoricial,37
+farm_name,character,Name of the farm,Categoricial,572
+lot_number,character,Lot number of the beans tested,Continous,228
+mill,character,Mill where the beans were processed,Continous,461
+ico_number,character,International Coffee Organization number,Continous,848
+company,character,Company name,Categoricial,282
+altitude,character,Altitude - this is a messy column - I've left it for some cleaning,Continous,397
+region,character,Region where bean came from,Continous,357
+producer,character,Producer of the roasted bean,Categoricial,692
+number_of_bags,double,Number of bags tested,Continous,131
+bag_weight,character,Bag weight tested,Continous,56
+in_country_partner,character,Partner for the country,Continous,27
+harvest_year,character,When the beans were harvested (year),Continous,47
+grading_date,character,When the beans were graded,Continous,567
+owner_1,character,Who owns the beans,Continous,320
+variety,character,Variety of the beans,Continous,30
+processing_method,character,Method for processing,Categoricial,6
+aroma,double,Aroma grade,Continous,33
+flavor,double,Flavor grade,Continous,35
+aftertaste,double,Aftertaste grade,Continous,35
+acidity,double,Acidity grade,Continous,31
+body,double,Body grade,Continous,33
+balance,double,Balance grade,Continous,33
+uniformity,double,Uniformity grade,Categoricial,10
+clean_cup,double,Clean cup grade,Categoricial,11
+sweetness,double,Sweetness grade,Continous,17
+cupper_points,double,Cupper Points,Continous,42
+moisture,double,Moisture Grade,Continous,23
+category_one_defects,double,Category one defects (count),Continous,18
+quakers,double,quakers,Categoricial,12
+color,character,Color of bean,Categoricial,5
+category_two_defects,double,Category two defects (count),Continous,38
+expiration,character,Expiration date of the beans,Continous,566
+certification_body,character,Who certified it,Continous,26
+certification_address,character,Certification body address,Continous,32
+certification_contact,character,Certification contact,Continous,29
+unit_of_measurement,character,Unit of measurement,Categoricial,2
+altitude_low_meters,double,Altitude low meters,Continous,199
+altitude_high_meters,double,Altitude high meters,Continous,199
+altitude_mean_meters,double,Altitude mean meters,Continous,212
